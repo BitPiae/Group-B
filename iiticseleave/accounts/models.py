@@ -36,8 +36,8 @@ class User(AbstractBaseUser):
                   (4, 'Standard')
                  )
 
-    firstName = models.CharField(max_length=255)
-    lastName = models.CharField(max_length=255, blank=True, null=True)
+    first_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255, blank=True, null=True)
     department = models.CharField(default='CSE',max_length=5)
     active = models.BooleanField(default=True)
     applicant = models.BooleanField(default=False)
@@ -58,13 +58,13 @@ class User(AbstractBaseUser):
 
 
     def get_full_name(self):
-        ans  = str(self.firstName)
-        if self.lastName is not None:
-            ans += " " + str(self.lastName)
+        ans  = str(self.first_name)
+        if self.last_name is not None:
+            ans += " " + str(self.last_name)
         return ans
 
     def get_short_name(self):
-        return self.firstName
+        return self.first_name
 
     def __str__(self):
         return self.get_full_name()

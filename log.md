@@ -7,13 +7,13 @@
 - [ ] removed from account add form 'classes': ('wide',),
 - [ ] removed : password = ReadOnlyPasswordHashField() from UserChangeForm(forms.ModelForm).
 
-- [ ] TODO: Add
+
 - [ ] MAJOR BUG: Applicant is able to change everything if he goes to edit form.
-- [X] TODO: Admin can't add user
+
 - [ ] TODO: Add upcoming functionality
 - [ ] TODO: Make PhD Accounts
-- [ ] TODO: Remove view site button top right
-- [ ] TODO: Deny editing after submitted
+- [X] TODO: Remove view site button top right
+
 - [ ] TODO: Make printing better
 - [ ] TODO: Figure out how to make typeOfLeave, startDate, endDate, render beautifully.
 - [ ] TODO: Figure out how prevent PhD students from deleting forms
@@ -51,3 +51,5 @@ Decision
   - [ ] appliations
 
 - Supervisor
+
+- [ ] made text style consistent, added hints,

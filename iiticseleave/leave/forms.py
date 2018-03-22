@@ -15,14 +15,14 @@ class ApplicationChangeForm(forms.ModelForm):
     class Meta:
         model = leave.models.Application
         fields = ['applicant',
-                  'typeOfLeave',
-                  'startDate',
-                  'endDate',
+                  'type_of_leave',
+                  'start_date',
+                  'end_date',
                   'prefix',
                   'suffix',
                   'reason',
                   'address',
-                  'availLTC',
+                  'avail_ltc',
                   'submitted',
                   'recommended',
                   'recommender',
@@ -32,12 +32,12 @@ class ApplicationChangeForm(forms.ModelForm):
                   'approver_comments']
     @log
     def clean(self):
-        start_date = self.cleaned_data.get("startDate")
-        end_date = self.cleaned_data.get("endDate")
+        start_date = self.cleaned_data.get("start_date")
+        end_date = self.cleaned_data.get("end_date")
 
         if end_date and start_date and end_date < start_date:
             msg = "End date should be greater than start date."
-            self._errors["endDate"] = self.error_class([msg])
+            self._errors["end_date"] = self.error_class([msg])
             raise forms.ValidationError(msg, code='invalid')
 
 
@@ -54,28 +54,28 @@ class ApplicationAdmin(admin.ModelAdmin):
                                  'approver',
                                  'approver_comments']
         recommender_cant_modify = ['applicant',
-                                  'typeOfLeave',
-                                  'startDate',
-                                  'endDate',
+                                  'type_of_leave',
+                                  'start_date',
+                                  'end_date',
                                   'prefix',
                                   'suffix',
                                   'reason',
                                   'address',
-                                  'availLTC',
+                                  'avail_ltc',
                                   'submitted',
                                   'recommender',
                                   'approved',
                                   'approver',
                                   'approver_comments']
         approver_cant_modify = ['applicant',
-                              'typeOfLeave',
-                              'startDate',
-                              'endDate',
+                              'type_of_leave',
+                              'start_date',
+                              'end_date',
                               'prefix',
                               'suffix',
                               'reason',
                               'address',
-                              'availLTC',
+                              'avail_ltc',
                               'submitted',
                               'recommended',
                               'recommender',
@@ -83,14 +83,14 @@ class ApplicationAdmin(admin.ModelAdmin):
                               'approver',
                               ]
         supervisor_cant_modify =['applicant',
-                              'typeOfLeave',
-                              'startDate',
-                              'endDate',
+                              'type_of_leave',
+                              'start_date',
+                              'end_date',
                               'prefix',
                               'suffix',
                               'reason',
                               'address',
-                              'availLTC',
+                              'avail_ltc',
                               'submitted',
                               'recommended',
                               'recommender',
@@ -99,14 +99,14 @@ class ApplicationAdmin(admin.ModelAdmin):
                               'approver',
                               'approver_comments']
         anything = ['applicant',
-                  'typeOfLeave',
-                  'startDate',
-                  'endDate',
+                  'type_of_leave',
+                  'start_date',
+                  'end_date',
                   'prefix',
                   'suffix',
                   'reason',
                   'address',
-                  'availLTC',
+                  'avail_ltc',
                   'submitted',
                   'recommended',
                   'recommender',
@@ -139,6 +139,8 @@ class ApplicationAdmin(admin.ModelAdmin):
                 self.readonly_fields = approver_cant_modify
             if request.user.is_applicant:
                 self.readonly_fields = applicant_cant_modify
+            if request.user.is_admin:
+                self.readonly_fields = []
 
         return self.readonly_fields
 
@@ -176,11 +178,16 @@ class ApplicationAdmin(admin.ModelAdmin):
             obj.recommender = request.user
         if request.user.is_approver:
             obj.approver = request.user
+        if request.user.is_admin:
+            obj.approver = request.user
+            obj.recommender = request.user
+            obj.recommended = True
+            obj.approved = True
         obj.save()
 
     list_display = ('applicant',
-                    'startDate',
-                    'endDate',
+                    'start_date',
+                    'end_date',
                     'submitted',
                     'recommended',
                     'approved')
@@ -190,12 +197,12 @@ class ApplicationAdmin(admin.ModelAdmin):
         if obj:
             if request.user == obj.applicant:
                 return ((None, {'fields': (
-                                            'typeOfLeave',
-                                            'startDate',
-                                            'endDate',
+                                            'type_of_leave',
+                                            'start_date',
+                                            'end_date',
                                             'prefix',
                                             'suffix',
-                                            'availLTC',
+                                            'avail_ltc',
                                             'reason',
                                             'address'
                                             )}),
@@ -210,12 +217,12 @@ class ApplicationAdmin(admin.ModelAdmin):
             else:
                 if request.user.is_recommender:
                     return ((None, {'fields': ('applicant',
-                                                'typeOfLeave',
-                                                'startDate',
-                                                'endDate',
+                                                'type_of_leave',
+                                                'start_date',
+                                                'end_date',
                                                 'prefix',
                                                 'suffix',
-                                                'availLTC',
+                                                'avail_ltc',
                                                 'reason',
                                                 'address'
                                                 )}),
@@ -225,12 +232,12 @@ class ApplicationAdmin(admin.ModelAdmin):
                                             )
                 if request.user.is_approver:
                     return ((None, {'fields': (
-                                                'typeOfLeave',
-                                                'startDate',
-                                                'endDate',
+                                                'type_of_leave',
+                                                'start_date',
+                                                'end_date',
                                                 'prefix',
                                                 'suffix',
-                                                'availLTC',
+                                                'avail_ltc',
                                                 'reason',
                                                 'address'
                                                 )}),
@@ -241,38 +248,38 @@ class ApplicationAdmin(admin.ModelAdmin):
         else:
             if request.user.is_admin:
                 return ((None,{'fields': ('applicant',
-                                        'typeOfLeave',
-                                        'startDate',
-                                        'endDate',
+                                        'type_of_leave',
+                                        'start_date',
+                                        'end_date',
                                         'prefix',
                                         'suffix',
                                         'reason',
                                         'address',
-                                        'availLTC',
-                                        'submitted')}),)
+                                        'avail_ltc',
+                                        )}),)
             else:
                 return ((None,{'fields': (
-                                        'typeOfLeave',
-                                        'startDate',
-                                        'endDate',
+                                        'type_of_leave',
+                                        'start_date',
+                                        'end_date',
                                         'prefix',
                                         'suffix',
                                         'reason',
                                         'address',
-                                        'availLTC',
+                                        'avail_ltc',
                                         'submitted')}),)
 
     list_filter = ('approved',
                    'recommended',
                    'submitted')
 
-    search_fields = ('startDate',
-                     'endDate',
+    search_fields = ('start_date',
+                     'end_date',
                      'reason',
                      'submitted',
                      'recommended',
                      'approved')
 
     readonly_fields = []
-    ordering = ('startDate', 'endDate')
+    ordering = ('start_date', 'end_date')
     filter_horizontal = ()

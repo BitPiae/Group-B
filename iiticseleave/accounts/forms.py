@@ -18,8 +18,8 @@ class UserCreationForm(forms.ModelForm):
 
     class Meta:
         model = accounts.models.User
-        fields = ('firstName',
-                  'lastName',
+        fields = ('first_name',
+                  'last_name',
                   'email',
                   'user_type',
                   'active',
@@ -43,8 +43,8 @@ class UserCreationForm(forms.ModelForm):
 class UserChangeForm(forms.ModelForm):
     class Meta:
         model = accounts.models.User
-        fields = ('firstName',
-                  'lastName',
+        fields = ('first_name',
+                  'last_name',
                   'email',
                   'password',
                   'active',
@@ -75,23 +75,23 @@ class UserAdmin(BaseUserAdmin):
     form = UserChangeForm
     add_form = UserCreationForm
 
-    list_display = ('firstName',
-                    'lastName',
+    list_display = ('first_name',
+                    'last_name',
                     'email',
                     'user_type',
                     'active',
                     'applicant')
 
     fieldsets = ((None, {'fields': ('email', 'recommender',)}),
-                 ('Personal info', {'fields': ('firstName',
-                                               'lastName',
+                 ('Personal info', {'fields': ('first_name',
+                                               'last_name',
                                                'department',
                                                'designation')}),
                  ('Permissions', {'fields': ('user_type','applicant')}),)
 
     add_fieldsets = ((None, {'classes': ('wide',),
-                            'fields': ('firstName',
-                                       'lastName',
+                            'fields': ('first_name',
+                                       'last_name',
                                        'email',
                                        'password1',
                                        'password2',
@@ -106,11 +106,11 @@ class UserAdmin(BaseUserAdmin):
                    'applicant',
                    'active')
 
-    search_fields = ('firstName',
-                     'lastName',
+    search_fields = ('first_name',
+                     'last_name',
                      'email',
                      'user_type')
 
     readonly_fields = []
-    ordering = ('firstName','lastName')
+    ordering = ('first_name','last_name')
     filter_horizontal = ()
