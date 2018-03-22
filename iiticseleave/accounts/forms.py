@@ -24,14 +24,14 @@ class UserCreationForm(forms.ModelForm):
                   'user_type',
                   'active',
                   'applicant')
+    @log
     def clean_password2(self):
-        # Check that the two password entries match
         password1 = self.cleaned_data.get("password1")
         password2 = self.cleaned_data.get("password2")
         if password1 and password2 and password1 != password2:
             raise forms.ValidationError("Passwords don't match")
         return password2
-
+    @log
     def save(self, commit=True):
         user = super(UserCreationForm, self).save(commit=False)
         user.set_password(self.cleaned_data["password1"])
@@ -50,13 +50,13 @@ class UserChangeForm(forms.ModelForm):
                   'active',
                   'user_type',
                   'applicant')
-
+    @log
     def clean_password(self):
         return self.initial["password"]
 
 
 class UserAdmin(BaseUserAdmin):
-
+    @log
     def get_queryset(self, request):
         """Returns only  rows"""
         result = super(UserAdmin, self).get_queryset(request)
@@ -64,10 +64,11 @@ class UserAdmin(BaseUserAdmin):
             result = result.filter(id=request.user.id)
         return result
 
-
+    @log
     def get_readonly_fields(self, request, obj=None):
-        if obj and not request.user.is_admin: # editing an existing object
-            return list(self.readonly_fields) + ['recommender', 'applicant', 'user_type']
+        if obj:
+            if not request.user.is_admin: # editing an existing object
+                return list(self.readonly_fields) + ['recommender', 'applicant', 'user_type', 'designation']
         return self.readonly_fields
 
 
@@ -81,24 +82,25 @@ class UserAdmin(BaseUserAdmin):
                     'active',
                     'applicant')
 
+    fieldsets = ((None, {'fields': ('email', 'recommender',)}),
+                 ('Personal info', {'fields': ('firstName',
+                                               'lastName',
+                                               'department',
+                                               'designation')}),
+                 ('Permissions', {'fields': ('user_type','applicant')}),)
 
-    fieldsets = (
-        (None, {'fields': ('email', 'recommender',)}),
-        ('Personal info', {'fields': ('firstName',
-                                      'lastName',
-                                      'department',
-                                      'designation')
-                          }
-        ),
-        ('Permissions', {'fields': ('user_type','applicant')}),
-    )
-
-    add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('firstName', 'lastName', 'email', 'password1', 'password2', 'user_type', 'active', 'applicant','recommender')}
-        ),
-    )
+    add_fieldsets = ((None, {'classes': ('wide',),
+                            'fields': ('firstName',
+                                       'lastName',
+                                       'email',
+                                       'password1',
+                                       'password2',
+                                       'department',
+                                       'designation',
+                                       'user_type',
+                                       'active',
+                                       'applicant',
+                                       'recommender')}),)
 
     list_filter = ('user_type',
                    'applicant',
@@ -109,6 +111,6 @@ class UserAdmin(BaseUserAdmin):
                      'email',
                      'user_type')
 
-    readonly_fields = ['department']
+    readonly_fields = []
     ordering = ('firstName','lastName')
     filter_horizontal = ()

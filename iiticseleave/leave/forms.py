@@ -10,34 +10,7 @@ def log(f):
         return ans
     return logged
 
-class ApplicationCreationForm(forms.ModelForm):
-    class Meta:
-        model = leave.models.Application
-        fields = ['applicant',
-                  'typeOfLeave',
-                  'startDate',
-                  'endDate',
-                  'prefix',
-                  'suffix',
-                  'reason',
-                  'address',
-                  'availLTC',
-                  'submitted',
-                  'recommended',
-                  'recommended_by',
-                  'recommender_comments',
-                  'approved',
-                  'approved_by',
-                  'approver_comments']
 
-    def clean(self):
-        start_date = self.cleaned_data.get("startDate")
-        end_date = self.cleaned_data.get("endDate")
-
-        if end_date and start_date and end_date < start_date:
-            msg = "End date should be greater than start date."
-            self._errors["endDate"] = self.error_class([msg])
-            raise forms.ValidationError(msg, code='invalid')
 class ApplicationChangeForm(forms.ModelForm):
     class Meta:
         model = leave.models.Application
@@ -52,12 +25,12 @@ class ApplicationChangeForm(forms.ModelForm):
                   'availLTC',
                   'submitted',
                   'recommended',
-                  'recommended_by',
+                  'recommender',
                   'recommender_comments',
                   'approved',
-                  'approved_by',
+                  'approver',
                   'approver_comments']
-
+    @log
     def clean(self):
         start_date = self.cleaned_data.get("startDate")
         end_date = self.cleaned_data.get("endDate")
@@ -67,64 +40,105 @@ class ApplicationChangeForm(forms.ModelForm):
             self._errors["endDate"] = self.error_class([msg])
             raise forms.ValidationError(msg, code='invalid')
 
-# class ApplicationChangeForm(forms.ModelForm):
-#     class Meta:
-#         model = leave.models.Application
-#         fields = ['applicant',
-#                   'typeOfLeave',
-#                   'startDate',
-#                   'endDate',
-#                   'prefix',
-#                   'suffix',
-#                   'reason',
-#                   'address',
-#                   'availLTC',
-#                   'submitted']
-#
-#     def clean(self):
-#         start_date = self.cleaned_data.get("startDate")
-#         end_date = self.cleaned_data.get("endDate")
-#
-#         if end_date is not None and start_date is not None and end_date < start_date:
-#             msg = "End date should be greater than start date."
-#             self._errors["endDate"] = self.error_class([msg])
-#             raise forms.ValidationError(msg, code='invalid')
 
 class ApplicationAdmin(admin.ModelAdmin):
-
-    applicant_cant_modify = ['applicant',
-                             'recommended',
-                             'recommended_by',
-                             'recommender_comments',
-                             'approved',
-                             'approved_by',
-                             'approver_comments']
-    recommender_cant_modify = ['applicant',
-                                'typeOfLeave',
-                                'startDate',
-                                'endDate',
-                                'prefix',
-                                'suffix',
-                                'availLTC',
-                                'reason',
-                                'address']
-    approver_cant_modify = recommender_cant_modify +                     ['recommender_comments', 'recommended_by']
-
-    print("this was run")
-
-    form = ApplicationCreationForm
-    add_form = ApplicationChangeForm
+    form = ApplicationChangeForm
 
     @log
     def get_readonly_fields(self, request, obj=None, **kwargs):
-        if obj is None or request.user.is_admin:
-            self.readonly_fields = []
-        if obj and obj.applicant == request.user:
-            self.readonly_fields = self.applicant_cant_modify
-        elif request.user.is_recommender:
-            self.readonly_fields = self.recommender_cant_modify
-        elif request.user.is_approver:
-            self.readonly_fields = self.approver_cant_modify
+        applicant_cant_modify = ['applicant',
+                                 'recommended',
+                                 'recommender',
+                                 'recommender_comments',
+                                 'approved',
+                                 'approver',
+                                 'approver_comments']
+        recommender_cant_modify = ['applicant',
+                                  'typeOfLeave',
+                                  'startDate',
+                                  'endDate',
+                                  'prefix',
+                                  'suffix',
+                                  'reason',
+                                  'address',
+                                  'availLTC',
+                                  'submitted',
+                                  'recommender',
+                                  'approved',
+                                  'approver',
+                                  'approver_comments']
+        approver_cant_modify = ['applicant',
+                              'typeOfLeave',
+                              'startDate',
+                              'endDate',
+                              'prefix',
+                              'suffix',
+                              'reason',
+                              'address',
+                              'availLTC',
+                              'submitted',
+                              'recommended',
+                              'recommender',
+                              'recommender_comments',
+                              'approver',
+                              ]
+        supervisor_cant_modify =['applicant',
+                              'typeOfLeave',
+                              'startDate',
+                              'endDate',
+                              'prefix',
+                              'suffix',
+                              'reason',
+                              'address',
+                              'availLTC',
+                              'submitted',
+                              'recommended',
+                              'recommender',
+                              'recommender_comments',
+                              'approved',
+                              'approver',
+                              'approver_comments']
+        anything = ['applicant',
+                  'typeOfLeave',
+                  'startDate',
+                  'endDate',
+                  'prefix',
+                  'suffix',
+                  'reason',
+                  'address',
+                  'availLTC',
+                  'submitted',
+                  'recommended',
+                  'recommender',
+                  'recommender_comments',
+                  'approved',
+                  'approver',
+                  'approver_comments']
+
+        self.readonly_fields = [ ]
+        if obj is not None:
+            if obj.applicant == request.user:
+                self.readonly_fields = applicant_cant_modify
+                if obj.is_approved:
+                    self.readonly_fields =  anything
+            else:
+                if request.user.is_admin:
+                    self.readonly_fields = [ ]
+                if request.user.is_supervisor:
+                    self.readonly_fields = supervisor_cant_modify
+                if request.user.is_recommender:
+                    self.readonly_fields = recommender_cant_modify
+                if request.user.is_approver:
+                    self.readonly_fields = approver_cant_modify
+        else:
+            if request.user.is_supervisor:
+                self.readonly_fields = supervisor_cant_modify
+            if request.user.is_recommender:
+                self.readonly_fields = recommender_cant_modify
+            if request.user.is_approver:
+                self.readonly_fields = approver_cant_modify
+            if request.user.is_applicant:
+                self.readonly_fields = applicant_cant_modify
 
         return self.readonly_fields
 
@@ -132,62 +146,19 @@ class ApplicationAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         res = super(ApplicationAdmin, self).get_queryset(request)
         temp = res.filter(id=-1) # Empty result
-        if request.user.is_admin or request.user.is_supervisor:
+        if request.user.is_admin:
+            temp = res
+        if request.user.is_supervisor:
             temp = res
         if request.user.is_recommender:
-            temp = res.filter(submitted=True)
+            temp = res.filter(submitted=True, recommender=request.user)
         if request.user.is_approver:
-            temp = res.filter(recommended=True)
-
+            temp = res.filter(recommended=True, submitted=True)
         if request.user.is_applicant:
             personal = res.filter(applicant=request.user)
-            temp = (temp | personal).distinct()
+            temp = temp | personal
         return temp
 
-    @log
-    def get_form(self, request, obj=None, **kwargs):
-        if obj:
-            if request.user.is_recommender:
-                kwargs['exclude'] = ['applicant',
-                                     'typeOfLeave',
-                                     'startDate',
-                                     'endDate',
-                                     'prefix',
-                                     'suffix',
-                                     'availLTC',
-                                     'reason',
-                                     'address',
-                                     'approved',
-                                     'submitted',
-                                     'approver_comments',
-                                     'approved_by',
-                                     'recommended_by']
-            elif request.user.is_approver:
-                kwargs['exclude'] = ['applicant',
-                                     'typeOfLeave',
-                                     'startDate',
-                                     'endDate',
-                                     'prefix',
-                                     'suffix',
-                                     'availLTC',
-                                     'reason',
-                                     'address',
-                                     'recommender_comments',
-                                     'recommended_by',
-                                     'recommended',
-                                     'submitted',
-                                     'approved_by']
-            elif  not request.user.is_admin:
-                kwargs['exclude'] = ['applicant',
-                                     'approved',
-                                     'recommender_comments',
-                                     'approver_comments',
-                                     'recommended_by',
-                                     'typeOfLeave',
-                                     'recommended',
-                                     'approved_by']
-        request.user.is_admin
-        return super(ApplicationAdmin, self).get_form(request, obj, **kwargs)
 
     @log
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
@@ -200,10 +171,11 @@ class ApplicationAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         if getattr(obj, 'applicant', None) is None:
             obj.applicant = request.user
+            obj.recommender = request.user.recommender
         if request.user.is_recommender:
-            obj.recommended_by = request.user
+            obj.recommender = request.user
         if request.user.is_approver:
-            obj.approved_by = request.user
+            obj.approver = request.user
         obj.save()
 
     list_display = ('applicant',
@@ -213,21 +185,62 @@ class ApplicationAdmin(admin.ModelAdmin):
                     'recommended',
                     'approved')
 
-    fieldsets = ((None, {'fields': ('applicant',
-                                    'typeOfLeave',
-                                    'startDate',
-                                    'endDate',
-                                    'prefix',
-                                    'suffix',
-                                    'availLTC'
-                                    '')}),
-                ('Status', {'fields': ('recommended',
-                                    'recommended_by',
-                                    'approved',
-                                    'approved_by')}),
-                                    )
+    @log
+    def get_fieldsets(self, request, obj=None):
+        if obj:
+            if request.user == obj.applicant:
+                return ((None, {'fields': (
+                                            'typeOfLeave',
+                                            'startDate',
+                                            'endDate',
+                                            'prefix',
+                                            'suffix',
+                                            'availLTC',
+                                            'reason',
+                                            'address'
+                                            )}),
+                        ('Status', {'fields': ('recommended',
+                                                'recommender',
+                                                'approved',
+                                                'approver',
+                                                'recommender_comments',
+                                                'approver_comments')}),
 
-    add_fieldsets = ((None,{'fields': ('applicant',
+                                        )
+            else:
+                if request.user.is_recommender:
+                    return ((None, {'fields': ('applicant',
+                                                'typeOfLeave',
+                                                'startDate',
+                                                'endDate',
+                                                'prefix',
+                                                'suffix',
+                                                'availLTC',
+                                                'reason',
+                                                'address'
+                                                )}),
+                            ('Decision',{'fields':('recommender_comments',
+                                                    'recommended',
+                                                    )}),
+                                            )
+                if request.user.is_approver:
+                    return ((None, {'fields': (
+                                                'typeOfLeave',
+                                                'startDate',
+                                                'endDate',
+                                                'prefix',
+                                                'suffix',
+                                                'availLTC',
+                                                'reason',
+                                                'address'
+                                                )}),
+                            ('Status', {'fields': ('recommender',
+                                                    'recommender_comments',
+                                                    )}),
+                            ('Decision',{'fields':('approved','approver_comments')},))
+        else:
+            if request.user.is_admin:
+                return ((None,{'fields': ('applicant',
                                         'typeOfLeave',
                                         'startDate',
                                         'endDate',
@@ -236,7 +249,18 @@ class ApplicationAdmin(admin.ModelAdmin):
                                         'reason',
                                         'address',
                                         'availLTC',
-                                        'submitted')}))
+                                        'submitted')}),)
+            else:
+                return ((None,{'fields': (
+                                        'typeOfLeave',
+                                        'startDate',
+                                        'endDate',
+                                        'prefix',
+                                        'suffix',
+                                        'reason',
+                                        'address',
+                                        'availLTC',
+                                        'submitted')}),)
 
     list_filter = ('approved',
                    'recommended',
@@ -248,8 +272,7 @@ class ApplicationAdmin(admin.ModelAdmin):
                      'submitted',
                      'recommended',
                      'approved')
+
     readonly_fields = []
-
     ordering = ('startDate', 'endDate')
-
     filter_horizontal = ()

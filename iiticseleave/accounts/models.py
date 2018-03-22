@@ -49,7 +49,7 @@ class User(AbstractBaseUser):
     designation = models.IntegerField(choices=c, default=3)
     recommender = models.ForeignKey('accounts.User',
                                     on_delete=models.PROTECT,
-                                    null=True)
+                                    null=True,blank=True)
 
     objects = UserManager()
 

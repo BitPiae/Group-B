@@ -20,6 +20,7 @@ from django.conf.urls import url
 admin.site.site_header = "IITI CSE Leave Management System"
 admin.site.site_title = "IITI CSE Leave Management System"
 admin.site.index_title = ""
+admin.site.site_url=""
 urlpatterns = [
     url(r'^', admin.site.urls),
 ]

@@ -1,2 +1,1 @@
-Deny editing after submitted
 
