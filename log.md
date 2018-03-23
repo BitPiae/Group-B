@@ -22,6 +22,7 @@
  22nd march
 - [ ] TODO: Print form ke liye template.
 - [ ] TODO: Admin can't change user's password.
+- [ ] TODO: make recommender compulsory if user is applicant 
 - [X] TODO: Add custom save buttons
 - [X] TODO: Set server time equal IST.
 - [X] TODO: Make sure prefix and suffix are non-negative

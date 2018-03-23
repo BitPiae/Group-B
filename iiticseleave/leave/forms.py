@@ -123,7 +123,7 @@ class ApplicationAdmin(admin.ModelAdmin):
                     self.readonly_fields =  anything
             else:
                 if request.user.is_admin:
-                    self.readonly_fields = [ ]
+                    self.readonly_fields = ['applicant']
                 if request.user.is_supervisor:
                     self.readonly_fields = supervisor_cant_modify
                 if request.user.is_recommender:
@@ -245,6 +245,25 @@ class ApplicationAdmin(admin.ModelAdmin):
                                                     'recommender_comments',
                                                     )}),
                             ('Decision',{'fields':('approved','approver_comments')},))
+                if request.user.is_admin:
+                    return ((None, {'fields': ( 'applicant',
+                                                'type_of_leave',
+                                                'start_date',
+                                                'end_date',
+                                                'prefix',
+                                                'suffix',
+                                                'avail_ltc',
+                                                'reason',
+                                                'address'
+                                                )}),
+                            ('Status', {'fields': ('recommended',
+                                                    'recommender',
+                                                    'approved',
+                                                    'approver',
+                                                    'recommender_comments',
+                                                    'approver_comments')}),
+
+                                            )
         else:
             if request.user.is_admin:
                 return ((None,{'fields': ('applicant',
